@@ -1,17 +1,18 @@
 '''
 To-do list:
-> read ID's from file
-> read models layers from file
-> assets from file
+> read ID's from file - done
+> read models layers from file - done
+> assets from file - done
 > save model training process and results to file
 > save confusion matrix to file
 > save model to file
-> write scropt to read and compile these saved files information
+> write script to read and compile these saved files information
 '''
 
 
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 import itertools
 import tensorflow as tf
@@ -26,6 +27,7 @@ import matplotlib.pyplot as plt
 '''
 Functions
 '''
+
 
 def plotImages(images_arr):
     fig, axes = plt.subplots(1, 10, figsize=(25,25))
@@ -69,6 +71,21 @@ def plot_confusion_matrix(cm, classes, normalize=False,
     plt.xlabel('Predicted label')
 
 
+def read_file(file, sheet, index=''):
+    f = pd.read_excel(file, sheet_name=sheet)
+    print(index == '')
+    if not index == '':
+        f.set_index('ID', inplace=True)
+    return f
+
+
+def read_list_of_lists(df, col):
+    column = df[col]
+    for i in df.index.values.tolist():
+        column[i] = column[i].splitlines()
+    return column
+
+
 def GPU_config(memory_growth):
     physical_devices = tf.config.experimental.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], memory_growth)
@@ -101,26 +118,20 @@ def make_predictions(model, test_batches, model_id):
 Main function
 '''
 
-def main():
-    models_ids = ['00'] # Will be read from file
-    models_layers = [["Conv2D(filters=16, kernel_size=11, strides=5, padding='same', activation='relu')", # Will be read from file
-                      "BatchNormalization()",
-                      "MaxPool2D(pool_size=4, strides=2, padding='same')",
-                      "Flatten()",
-                      "Dense(512, activation='relu')",
-                      "Dropout(0.4)",
-                      "Dense(128, activation='relu')",
-                      "Dropout(0.4)",
-                      "Dense(3, activation='softmax')"]]
 
-    if len(models_ids) != len(models_layers):
-        raise Exception('IDs and layers with different dimensions.')
+def main():
+    input_models_data = read_file('input_data.xlsx', 'Models', 'ID')
+
+    assets = read_file('input_data.xlsx', 'Assets')['Train_assets'].tolist()
+    models_ids = input_models_data.index.values.tolist()
+    models_layers = read_list_of_lists(input_models_data, 'Layers')
+    epochs = input_models_data['Epochs']
+
+    if not len(models_ids) == len(models_layers) == len(epochs):
+        raise Exception('Data inputs with incompatible dimensions.')
     
-    assets = ['VALE3'] # Will be read from file
     steps = ['train', 'test', 'valid']
     target_size = (300,300)
-    epochs = 2
-
     GPU_config(memory_growth=True)
 
     for asset in assets:
@@ -128,10 +139,11 @@ def main():
         train_batches = gen_img_data(steps[0], target_size, data_path)
         valid_batches = gen_img_data(steps[1], target_size, data_path)
         test_batches  = gen_img_data(steps[2], target_size, data_path)
-        for i in range(0, len(models_layers)):
+        for i in models_ids:
+            print('\n>>> Training model {:0>3} for {} <<<\n'.format(i, asset))
             model = build_model(target_size, models_layers[i])
             model.compile(loss=categorical_crossentropy, optimizer='adam', metrics='accuracy')
-            model.fit(x=train_batches, validation_data=valid_batches, epochs=epochs)
+            model.fit(x=train_batches, validation_data=valid_batches, epochs=epochs[i])
             predictions = make_predictions(model, test_batches, models_ids[i])
 
 

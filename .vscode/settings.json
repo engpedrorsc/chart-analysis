@@ -9,6 +9,7 @@
         "conv d",
         "d",
         "name",
+        "tolist",
         "train",
         "train batches",
         "valid",
