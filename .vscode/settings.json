@@ -1,3 +1,22 @@
 {
-    "python.pythonPath": "C:\\Users\\pedro\\anaconda3\\envs\\Trade\\python.exe"
+    "python.pythonPath": "C:\\Users\\pedro\\anaconda3\\envs\\Trade\\python.exe",
+    "cSpell.ignoreWords": [
+        "arange",
+        "astype",
+        "batches",
+        "cmap",
+        "conv",
+        "conv d",
+        "d",
+        "name",
+        "train",
+        "train batches",
+        "valid",
+        "valid batches",
+        "xlabel",
+        "xticks",
+        "ylabel",
+        "yticks"
+    ],
+    "git.ignoreLimitWarning": true
 }
