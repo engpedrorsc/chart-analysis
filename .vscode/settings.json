@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\pedro\\anaconda3\\envs\\Trade\\python.exe",
+    "python.pythonPath": "chart_analysis_env\\Scripts\\python.exe",
     "cSpell.ignoreWords": [
         "arange",
         "astype",
